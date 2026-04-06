@@ -208,25 +208,45 @@ main{padding:clamp(12px,3vw,20px) clamp(12px,4vw,24px);max-width:1040px;margin:0
 /* COLOR */
 .cred{color:var(--red);}.cgrn{color:var(--grn);}.camb{color:var(--amb);}.cblu{color:var(--blu);}.cy{color:var(--yd);}
 
-/* MOBILE BOTTOM NAV */
+/* BOTTOM NAV — hidden by default, shown on small screens */
+#bnav{display:none;}
+
+/* MOBILE PORTRAIT — phones up to 600px */
 @media(max-width:600px){
   nav{display:none;}
-  #bnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--blk);border-top:1px solid var(--blk3);z-index:100;padding:6px 4px 10px;}
-  .bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 2px;transition:all 0.12s;}
-  .bni .bico{font-size:20px;line-height:1;}
+  #bnav{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--blk);
+    border-top:1px solid var(--blk3);
+    z-index:500;
+    padding:6px 4px env(safe-area-inset-bottom, 10px);
+    padding-bottom:max(10px, env(safe-area-inset-bottom));
+  }
+  .bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 2px;transition:all 0.12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  .bni .bico{font-size:22px;line-height:1;}
   .bni .blbl{font-size:9px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.2px;}
   .bni.active .blbl{color:var(--y);}
   .bni.active .bico{filter:drop-shadow(0 0 5px rgba(245,196,0,0.7));}
-  main{padding:10px 12px 80px;}
+  main{padding:10px 12px 90px;}
   header{height:50px;}
   .g2{grid-template-columns:1fr;}
   .metrics{grid-template-columns:repeat(2,1fr);}
   .hbtn{width:28px;height:28px;}
   .mpill input{width:88px;}
+  .tab{padding:10px 10px;}
+  .fgrid{grid-template-columns:1fr 1fr;}
 }
-@media(min-width:601px){#bnav{display:none;}}
+
+/* TABLET PORTRAIT — 601px to 900px */
 @media(min-width:601px) and (max-width:900px){
   .metrics{grid-template-columns:repeat(3,1fr);}
+  .g2{grid-template-columns:1fr 1fr;}
+}
+
+/* LARGE DESKTOP */
+@media(min-width:901px){
+  .metrics{grid-template-columns:repeat(6,1fr);}
 }
 @media(min-width:901px){
   .metrics{grid-template-columns:repeat(6,1fr);}
@@ -1484,11 +1504,26 @@ function attachPinEvents() {
   }
 }
 
+// Attach bottom nav touch events for iOS
+function attachBnavEvents() {
+  const bnav = document.getElementById('bnav');
+  if(!bnav) return;
+  function handleBnav(e) {
+    e.preventDefault();
+    const item = e.target.closest('[data-tab]');
+    if(!item) return;
+    switchTab(item.getAttribute('data-tab'));
+  }
+  bnav.addEventListener('touchend', handleBnav, {passive: false});
+  bnav.addEventListener('click', handleBnav);
+}
+
 // Run after page loads
 if(document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', attachPinEvents);
+  document.addEventListener('DOMContentLoaded', () => { attachPinEvents(); attachBnavEvents(); });
 } else {
   attachPinEvents();
+  attachBnavEvents();
 }
 
 // ── INIT ──────────────────────────────────────────────────────
